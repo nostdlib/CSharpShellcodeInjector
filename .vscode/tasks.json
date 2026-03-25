@@ -1,0 +1,36 @@
+{
+    "version": "2.0.0",
+    "inputs": [
+        {
+            "id": "configuration",
+            "type": "pickString",
+            "description": "Build configuration",
+            "options": ["Debug", "Release"],
+            "default": "Release"
+        },
+        {
+            "id": "platform",
+            "type": "pickString",
+            "description": "Target platform",
+            "options": ["AnyCPU", "x86", "x64", "ARM64"],
+            "default": "AnyCPU"
+        }
+    ],
+    "tasks": [
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "msbuild",
+            "args": [
+                "ShellcodeInjector.csproj",
+                "/p:Configuration=${input:configuration}",
+                "/p:Platform=${input:platform}"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}

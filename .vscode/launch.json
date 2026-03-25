@@ -1,0 +1,33 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug AnyCPU",
+            "type": "clr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/bin/Debug/ShellcodeInjector.dll"
+        },
+        {
+            "name": "Debug x86",
+            "type": "clr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/bin/x86/Debug/ShellcodeInjector.dll"
+        },
+        {
+            "name": "Debug x64",
+            "type": "clr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/bin/x64/Debug/ShellcodeInjector.dll"
+        },
+        {
+            "name": "Debug ARM64",
+            "type": "clr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/bin/ARM64/Debug/ShellcodeInjector.dll"
+        }
+    ]
+}

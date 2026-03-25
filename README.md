@@ -4,7 +4,7 @@
 
 ## How It Works
 
-1. Detects architecture (x86/x64) and selects the appropriate payload URL
+1. Detects architecture (x86/x64/ARM64) via `GetNativeSystemInfo` and selects the appropriate payload URL
 2. Downloads shellcode from the configured URL
 3. Resolves `NtAllocateVirtualMemory` from ntdll via PEB walking and export table hashing (no `GetProcAddress` import)
 4. Allocates RWX memory and copies the shellcode
@@ -28,6 +28,7 @@ Replace the following placeholders before building:
 |---|---|
 | `%URL64%` | URL to the x64 shellcode payload |
 | `%URL32%` | URL to the x86 shellcode payload |
+| `%URLARM64%` | URL to the ARM64 shellcode payload |
 
 ## Build
 
@@ -37,6 +38,6 @@ Requires Visual Studio or MSBuild with .NET Framework 2.0 targeting pack.
 msbuild ShellcodeInjector.csproj /p:Configuration=Release /p:Platform=AnyCPU
 ```
 
-Build targets: `AnyCPU`, `x86`, `x64`
+Build targets: `AnyCPU`, `x86`, `x64`, `ARM64`
 
 A post-build step automatically generates a base64-encoded copy of the output DLL (`ShellcodeInjector.b64.txt`).

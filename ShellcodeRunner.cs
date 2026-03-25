@@ -5,19 +5,29 @@ namespace ShellcodeInjector
 {
     internal static class ShellcodeRunner
     {
-        internal static void RunPayload(byte[] bytes)
+        internal static void RunPayload(byte[] bytes, ushort processorArchitecture)
         {
-            byte[] asm = IntPtr.Size == 8
+            bool isArm64 = processorArchitecture == 12;
+
+            byte[] asm;
+            if (isArm64)
+                // mov x0, x18; ret
+                asm = new byte[] { 0xE0, 0x03, 0x12, 0xAA, 0xC0, 0x03, 0x5F, 0xD6 };
+            else if (IntPtr.Size == 8)
                 // mov rax, qword ptr gs:[0x30]; ret
-                ? new byte[] { 0x65, 0x48, 0xA1, 0x30, 0, 0, 0, 0, 0, 0, 0, 0xC3 }
+                asm = new byte[] { 0x65, 0x48, 0xA1, 0x30, 0, 0, 0, 0, 0, 0, 0, 0xC3 };
+            else
                 // mov eax, dword ptr fs:[0x18]; ret
-                : new byte[] { 0x64, 0xA1, 0x18, 0, 0, 0, 0xC3 };
+                asm = new byte[] { 0x64, 0xA1, 0x18, 0, 0, 0, 0xC3 };
 
             IntPtr ptr = Marshal.AllocHGlobal(asm.Length);
             Marshal.Copy(asm, 0, ptr, asm.Length);
 
             uint oldProtect;
             NativeImports.ChangeMemoryProtection(ptr, (UIntPtr)asm.Length, 0x40, out oldProtect);
+
+            if (isArm64)
+                NativeImports.FlushInstructionCache(new IntPtr(-1), ptr, (UIntPtr)asm.Length);
 
             var getTEB = (GetTEBDelegate)Marshal.GetDelegateForFunctionPointer(ptr, typeof(GetTEBDelegate));
             IntPtr tebAddress = getTEB();
@@ -50,6 +60,9 @@ namespace ShellcodeInjector
             );
 
             Marshal.Copy(bytes, 0, pMemory, bytes.Length);
+
+            if (isArm64)
+                NativeImports.FlushInstructionCache(new IntPtr(-1), pMemory, (UIntPtr)bytes.Length);
 
             IntPtr parametersMemory = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(Parameters)));
             Parameters parameters = new Parameters

